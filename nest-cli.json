@@ -10,23 +10,23 @@
   "monorepo": true,
   "root": "apps/omi-transactional",
   "projects": {
-  },
-  "api": {
-    "type": "application",
-    "root": "apps/api",
-    "entryFile": "main",
-    "sourceRoot": "apps/api/src",
-    "compilerOptions": {
-      "tsConfigPath": "apps/api/tsconfig.app.json"
-    }
-  },
-  "transactional": {
-    "type": "library",
-    "root": "libs/transactional",
-    "entryFile": "index",
-    "sourceRoot": "libs/transactional/src",
-    "compilerOptions": {
-      "tsConfigPath": "libs/transactional/tsconfig.lib.json"
+    "api": {
+      "type": "application",
+      "root": "apps/api",
+      "entryFile": "main",
+      "sourceRoot": "apps/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api/tsconfig.app.json"
+      }
+    },
+    "transactional": {
+      "type": "library",
+      "root": "libs/transactional",
+      "entryFile": "index",
+      "sourceRoot": "libs/transactional/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/transactional/tsconfig.lib.json"
+      }
     }
   }
 }
