@@ -1,10 +1,15 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
+import { ConnectionMiddleware, TransactionalModule } from '@lib/transactional';
 
 @Module({
-  imports: [],
+  imports: [TransactionalModule],
   controllers: [ApiController],
   providers: [ApiService],
 })
-export class ApiModule {}
+export class ApiModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(ConnectionMiddleware).forRoutes('*');
+  }
+}
