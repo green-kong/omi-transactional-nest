@@ -6,7 +6,8 @@ export class ApiController {
   constructor(private readonly apiService: ApiService) {}
 
   @Get()
-  getHello(): string {
-    return this.apiService.getHello();
+  async getHello(): Promise<{ id: number }> {
+    const savedId = await this.apiService.saveMember('test');
+    return { id: savedId };
   }
 }

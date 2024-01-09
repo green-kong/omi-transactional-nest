@@ -38,7 +38,7 @@ export class TransactionalRegister implements OnModuleInit {
 
           instance[methodName] = async (...args: any[]) => {
             return this.transactionTemplate.transact(() =>
-              originalMethod.apply(this, args),
+              originalMethod.apply(instance, args),
             );
           };
         });
