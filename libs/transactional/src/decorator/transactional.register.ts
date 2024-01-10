@@ -26,7 +26,6 @@ export class TransactionalRegister implements OnModuleInit {
           Object.getPrototypeOf(instance),
         );
         methodNames.forEach((methodName) => {
-          // todo : propagattion 고민해보기 우선은 그냥 required(default)로
           const transactionalOption = this.reflector.get<
             TransactionalOption,
             symbol
@@ -37,7 +36,7 @@ export class TransactionalRegister implements OnModuleInit {
           const originalMethod = instance[methodName];
 
           instance[methodName] = async (...args: any[]) => {
-            return this.transactionTemplate.transact(() =>
+            return this.transactionTemplate.transact(transactionalOption, () =>
               originalMethod.apply(instance, args),
             );
           };
