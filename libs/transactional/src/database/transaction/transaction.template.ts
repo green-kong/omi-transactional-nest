@@ -38,20 +38,28 @@ export class TransactionTemplate {
       if (transactionOption.propagation === Propagation.REQUIRES_NEW) {
         // 새로운 커넥션
         const connection = await this.connectionManager.connect();
-        await this.transactionManager.beginTransaction(
+        const transaction = await this.transactionManager.beginTransaction(
           transactionOption,
           connection,
         );
-        return await this.runCallbackInTemplate(callback, connection);
+        try {
+          const result = await callback();
+          await this.transactionManager.commit(transaction);
+          return result;
+        } catch (error) {
+          await this.transactionManager.rollback(transaction);
+        } finally {
+          await this.transactionManager.release(transaction);
+        }
       }
     } else {
       // 기존트랜잭션 없는 경우
       const connection = await this.connectionHolder.getConnection();
-      await this.transactionManager.beginTransaction(
+      const transaction = await this.transactionManager.beginTransaction(
         transactionOption,
         connection,
       );
-      return await this.runCallbackInTemplate(callback, connection);
+      return await this.runCallbackInTemplate(callback, transaction);
     }
   }
 

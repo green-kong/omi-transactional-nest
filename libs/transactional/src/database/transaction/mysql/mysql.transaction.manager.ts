@@ -20,24 +20,28 @@ export class MysqlTransactionManager implements TransactionManager {
   async beginTransaction(
     transactionOption: TransactionalOption,
     connection: PoolConnection,
-  ): Promise<void> {
+  ): Promise<any> {
     await connection.beginTransaction();
     const transaction = new Transaction(
       transactionOption.propagation,
       connection,
     );
     this.transactions.push(transaction);
+    return transaction;
   }
 
-  async commit(connection: PoolConnection): Promise<void> {
+  async commit(transaction: Transaction): Promise<void> {
+    const connection = transaction.connection;
     await connection.commit();
   }
 
-  async rollback(connection: PoolConnection): Promise<void> {
+  async rollback(transaction: Transaction): Promise<void> {
+    const connection = transaction.connection;
     await connection.rollback();
   }
 
-  async release(connection: any): Promise<void> {
+  async release(transaction: Transaction): Promise<void> {
+    const connection = transaction.connection;
     await this.connectionManager.release(connection);
     this.transactions.pop();
   }
@@ -48,5 +52,9 @@ export class MysqlTransactionManager implements TransactionManager {
 
   getCurrentTransactionPropagation(): Propagation {
     return this.transactions[this.transactions.length - 1].propagation;
+  }
+
+  getCurrentTransactionConnection(): any {
+    return this.transactions[this.transactions.length - 1].connection;
   }
 }

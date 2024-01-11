@@ -74,4 +74,123 @@ describe('transaction test', () => {
       expect(beforeCount).toEqual(afterCount);
     });
   });
+
+  describe('기존 트랜잭션 존재 : O, propagation: REQUIRED 테스트', () => {
+    it('commit 테스트', async () => {
+      const holder = connectionHolder.getHolder();
+      await holder.runAndReturn(async () => {
+        await connectionHolder.holdConnection();
+
+        // given
+        await repository.clear();
+        const beforeCount = await repository.count();
+        const name1 = 'test1';
+        const name2 = 'test2';
+
+        // when
+        await service.nestedRequiredTransaction(name1, name2);
+        const afterCount = await repository.count();
+
+        // then
+        expect(afterCount).toEqual(beforeCount + 2);
+      });
+    });
+
+    it('rollback 테스트', async () => {
+      const holder = connectionHolder.getHolder();
+      await holder.runAndReturn(async () => {
+        await connectionHolder.holdConnection();
+
+        // given
+        await repository.clear();
+        const beforeCount = await repository.count();
+        const name1 = 'test1';
+        const name2 = 'test2';
+
+        // when
+        await expect(
+          service.nestedRequiredRollbackTransaction(name1, name2),
+        ).rejects.toThrow(new Error());
+        const afterCount = await repository.count();
+
+        // then
+        expect(afterCount).toEqual(beforeCount);
+      });
+    });
+  });
+
+  describe('기존 트랜잭션 존재 : O, propagation: REQUIRES_NEW 테스트', () => {
+    it('commit test', async () => {
+      const holder = connectionHolder.getHolder();
+      await holder.runAndReturn(async () => {
+        await connectionHolder.holdConnection();
+
+        // given
+        await repository.clear();
+        const beforeCount = await repository.count();
+        const name1 = 'test1';
+        const name2 = 'test2';
+
+        // when
+        const ids = await service.nestedRequiresNewTransactionSuccess(
+          name1,
+          name2,
+        );
+        const afterCount = await repository.count();
+
+        // then
+        expect(afterCount).toEqual(beforeCount + 2);
+      });
+    });
+
+    it('child transaction rollback test', async () => {
+      const holder = connectionHolder.getHolder();
+      await holder.runAndReturn(async () => {
+        await connectionHolder.holdConnection();
+
+        // given
+        await repository.clear();
+        const beforeCount = await repository.count();
+        const name1 = 'test1';
+        const name2 = 'test2';
+
+        // when
+        await service.nestedRequiresNewTransactionChildFail(name1, name2);
+        const afterCount = await repository.count();
+        const member1 = await repository.findById(1);
+        const member2 = await repository.findById(2);
+
+        // then
+        expect(afterCount).toEqual(beforeCount + 1);
+        expect(member1.name).toEqual(name1);
+        expect(member2).toBeNull();
+      });
+    });
+
+    it('parent transaction rollback test', async () => {
+      const holder = connectionHolder.getHolder();
+      await holder.runAndReturn(async () => {
+        await connectionHolder.holdConnection();
+
+        // given
+        await repository.clear();
+        const beforeCount = await repository.count();
+        const name1 = 'test1';
+        const name2 = 'test2';
+
+        // when
+        await expect(
+          service.nestedRequiresNewTransactionParentFail(name1, name2),
+        ).rejects.toThrow();
+        const afterCount = await repository.count();
+        const member1 = await repository.findById(1);
+        const member2 = await repository.findById(2);
+
+        // then
+        expect(afterCount).toEqual(beforeCount + 1);
+        expect(member1).toBeNull();
+        expect(member2.name).toEqual(name2);
+      });
+    });
+  });
 });

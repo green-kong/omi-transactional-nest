@@ -5,7 +5,7 @@ export interface TransactionManager {
   beginTransaction(
     transactionOption: TransactionalOption,
     connection: any,
-  ): Promise<void>;
+  ): Promise<any>;
 
   commit(connection: any): Promise<void>;
 
@@ -16,4 +16,6 @@ export interface TransactionManager {
   existsCurrentTransaction(): boolean;
 
   getCurrentTransactionPropagation(): Propagation;
+
+  getCurrentTransactionConnection(): any;
 }

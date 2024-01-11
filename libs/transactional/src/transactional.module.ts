@@ -23,6 +23,7 @@ import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
     ConnectionHolder,
     { provide: 'connectionPool', useClass: MysqlConnectionPool },
     { provide: 'connectionManager', useClass: MysqlConnectionManager },
+    { provide: 'transactionManager', useClass: MysqlTransactionManager },
   ],
 })
 export class TransactionalModule {}
